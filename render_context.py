@@ -38,9 +38,6 @@ MARKER_END   = "<!-- TOPOLOGY:END -->"
 # the block is reference that agents read here when a task touches it.
 SESSION_START = "<!-- SESSION:START -->"
 SESSION_END   = "<!-- SESSION:END -->"
-# Separators of the rendered format (em dash, middle dot).
-DASH = " \u2014 "
-DOT  = " \u00b7 "
 
 NO_INSTANCE = """No instance found. Pass --instance DIR, set G_INSTANCE, or put an
 instance repo (gp-core) beside this g-core checkout. To start one:
@@ -76,8 +73,10 @@ def generate(manifest: dict, name: str) -> str:
     lines.append(SESSION_START)
     lines.append("### Hosts")
     for h in manifest.get("hosts", []):
+        # The alias list is comma-separated too, so it gets a sentence of its own.
         aliases = ", ".join(h.get("aliases", []))
-        lines.append(f"- **{h['id']}**{DASH}{h['hostname']} ({h['provider']}){DOT}user: {h['user']}{DOT}aliases: {aliases}")
+        lines.append(f"- **{h['id']}**: {h['hostname']} ({h['provider']}), user {h['user']}"
+                     + (f". Aliases: {aliases}" if aliases else ""))
     lines.append("")
     lines.append(f"Services, system repos and key paths: {name}/CLAUDE.md topology block; manifest.json is the SSOT.")
     lines.append(SESSION_END)
@@ -91,16 +90,17 @@ def generate(manifest: dict, name: str) -> str:
     for host, svcs in by_host.items():
         lines.append(f"**{host}**")
         for s in svcs:
-            domain = s.get("domain") or (f":{s['port']}" if s.get("port") else "")
-            unit = s.get("unit", "")
-            lines.append(f"  - {s['id']}{(DOT + domain) if domain else ''}{(DOT + 'systemd: ' + unit) if unit else ''}")
+            where = s.get("domain") or (f"port {s['port']}" if s.get("port") else "")
+            unit = s.get("unit") and f"systemd unit {s['unit']}"
+            facts = ", ".join(f for f in (where, unit) if f)
+            lines.append(f"  - {s['id']}{(': ' + facts) if facts else ''}")
     lines.append("")
 
     # System repos
     lines.append("### System repos")
     for r in manifest.get("system", []):
         inherits = ", ".join(r.get("inherits_from", []))
-        lines.append(f"- **{r['id']}**{DASH}{r['description']}{(' (inherits: ' + inherits + ')') if inherits else ''}")
+        lines.append(f"- **{r['id']}**: {r['description']}{(' (inherits: ' + inherits + ')') if inherits else ''}")
     lines.append("")
 
     # Key paths, per host
@@ -109,7 +109,7 @@ def generate(manifest: dict, name: str) -> str:
             continue
         lines.append(f"### Key paths on {h['id']}")
         for k in h["key_paths"]:
-            lines.append(f"- `{k['path']}`{DASH}{k['note']}")
+            lines.append(f"- `{k['path']}`: {k['note']}")
         lines.append("")
 
     lines.append(MARKER_END)

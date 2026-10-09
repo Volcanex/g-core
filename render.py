@@ -9,10 +9,15 @@ render_context.py.
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 
 from render_context import resolve_instance
+
+# A description's subtitle ends at its first colon, or at the em dash that older
+# instance data still uses there.
+SUBTITLE_END = re.compile(": | \u2014 ")
 
 
 def manifest(instance: Path | None = None) -> dict:
@@ -41,9 +46,9 @@ def diagram_elements(highlight: str | None = None, instance: Path | None = None)
     system = manifest(instance).get("system", [])
     ids = {r["id"] for r in system}
 
-    # System repos; the subtitle is the description up to its first dash
+    # System repos
     for r in system:
-        subtitle = r.get("description", "").split(" \u2014 ")[0]
+        subtitle = SUBTITLE_END.split(r.get("description", ""), maxsplit=1)[0]
         node(r["id"], r["id"], subtitle, "system", highlight == r["id"])
 
     # Framework
