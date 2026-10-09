@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Instance pre-commit hook: regenerate the topology block in CLAUDE.md (and the
+# AGENTS.md symlink) from manifest.json, then stage both.
+# Copy into an instance repo as .githooks/pre-commit and enable it with
+#   git config core.hooksPath .githooks
+# Renders with g-core from $G_CORE (default: a g-core checkout beside the
+# instance). Without one it falls back to the instance's own copy of
+# render_context.py, which renders the repo it lives in.
+cd "$(git rev-parse --show-toplevel)" || exit 1
+[[ -f manifest.json ]] || exit 0
+G_CORE="${G_CORE:-../g-core}"
+if [[ -f "$G_CORE/render_context.py" ]]; then
+  python3 "$G_CORE/render_context.py" --instance .
+elif [[ -f render_context.py ]]; then
+  python3 render_context.py
+else
+  echo "pre-commit: no g-core at $G_CORE and no local render_context.py; topology block not refreshed" >&2
+fi
+git add CLAUDE.md AGENTS.md

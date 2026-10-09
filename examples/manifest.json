@@ -1,0 +1,202 @@
+{
+  "hosts": [
+    {
+      "id": "a",
+      "hostname": "192.0.2.10",
+      "aliases": [
+        "a",
+        "alpha",
+        "example.com"
+      ],
+      "provider": "Example Cloud",
+      "user": "root",
+      "workspace": 2,
+      "key_paths": [
+        {
+          "path": "/srv/g/my-core/",
+          "note": "this repo (topology SSOT)"
+        },
+        {
+          "path": "/srv/g/g-env/",
+          "note": "environment wiring"
+        },
+        {
+          "path": "/srv/g/my-core/.env",
+          "note": "passport (secrets, private to this instance)"
+        }
+      ]
+    },
+    {
+      "id": "w",
+      "hostname": "192.0.2.20",
+      "aliases": [
+        "w",
+        "worker"
+      ],
+      "provider": "Example Cloud",
+      "user": "deploy",
+      "workspace": 3
+    }
+  ],
+  "workspaces": [
+    {
+      "number": 1,
+      "name": "Local",
+      "host": null
+    },
+    {
+      "number": 2,
+      "name": "Alpha",
+      "host": "a"
+    },
+    {
+      "number": 3,
+      "name": "Worker",
+      "host": "w"
+    },
+    {
+      "number": 5,
+      "name": "Free",
+      "host": null,
+      "hot": true
+    }
+  ],
+  "system": [
+    {
+      "id": "my-core",
+      "description": "Topology data and conventions for this instance",
+      "url": "https://github.com/example/my-core",
+      "private": true,
+      "inherits_from": [],
+      "instance": true
+    },
+    {
+      "id": "g-brain",
+      "description": "Knowledge base, MCP server and indexes",
+      "url": "https://github.com/example/g-brain",
+      "private": false,
+      "inherits_from": [
+        "my-core"
+      ]
+    },
+    {
+      "id": "g-env",
+      "description": "Environment wiring for agents, shells and git",
+      "url": "https://github.com/example/g-env",
+      "private": false,
+      "inherits_from": [
+        "my-core",
+        "g-brain"
+      ]
+    },
+    {
+      "id": "g-command-web",
+      "description": "Command dashboard for services, health and the brain",
+      "url": "https://github.com/example/g-command-web",
+      "private": false,
+      "inherits_from": [
+        "my-core",
+        "g-brain"
+      ]
+    }
+  ],
+  "services": [
+    {
+      "id": "brain-mcp",
+      "repo": "g-brain",
+      "host": "a",
+      "port": 8766,
+      "domain": null,
+      "unit": "brain-mcp",
+      "health_url": null
+    },
+    {
+      "id": "brain-api",
+      "repo": "g-brain",
+      "host": "a",
+      "port": 8766,
+      "domain": "api.brain.example.com",
+      "unit": "brain-mcp",
+      "health_url": "https://api.brain.example.com/api/graph"
+    },
+    {
+      "id": "command",
+      "repo": "g-command-web",
+      "host": "a",
+      "port": 8090,
+      "domain": "command.example.com",
+      "unit": "g-command-web",
+      "health_url": null
+    },
+    {
+      "id": "blog",
+      "repo": "blog",
+      "host": "w",
+      "port": null,
+      "domain": "blog.example.com",
+      "unit": null,
+      "health_url": null
+    }
+  ],
+  "dependencies": [
+    {
+      "id": "ntfy",
+      "provider": "ntfy",
+      "powers": "the alert spine, every push alert",
+      "criticality": "vital",
+      "probe": {
+        "type": "ntfy",
+        "url_env": "NTFY_URL"
+      }
+    },
+    {
+      "id": "llm",
+      "provider": "Example LLM API",
+      "powers": "inference for agents and scheduled jobs",
+      "criticality": "vital",
+      "probe": {
+        "type": "balance",
+        "url": "https://api.example.com/v1/credits",
+        "auth_env": "EXAMPLE_LLM_API_KEY",
+        "value_path": "data.credits",
+        "min": 5.0
+      }
+    },
+    {
+      "id": "domain",
+      "provider": "Example Registrar",
+      "powers": "example.com and every subdomain",
+      "criticality": "important",
+      "probe": {
+        "type": "expires",
+        "date": "2030-01-01",
+        "warn_days": 30
+      }
+    },
+    {
+      "id": "sms",
+      "provider": "Example SMS",
+      "powers": "text alerts from the command dashboard",
+      "criticality": "nice",
+      "health": {
+        "service": "command",
+        "check": "sms"
+      }
+    }
+  ],
+  "projects": [
+    {
+      "id": "blog",
+      "url": "https://github.com/example/blog",
+      "host": "w",
+      "managed": true
+    },
+    {
+      "id": "old-site",
+      "url": "https://github.com/example/old-site",
+      "host": "w",
+      "managed": false,
+      "status": "fossil"
+    }
+  ]
+}

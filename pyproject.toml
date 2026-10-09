@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "g-core"
+version = "1.0.0"
+description = "Topology schema and renderers for a G-System instance"
+requires-python = ">=3.9"
+license = {file = "LICENSE"}
+
+[tool.setuptools]
+py-modules = ["render", "render_context"]
+
+[tool.g-core]
+depends = []

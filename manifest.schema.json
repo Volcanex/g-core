@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "G-System instance manifest",
+  "description": "Topology of one G-System instance. Readers ignore keys they do not know, so an instance may add its own. render_context.py --check validates type, enum, required, properties and items with the standard library only.",
+  "type": "object",
+  "required": ["hosts", "system", "services"],
+  "properties": {
+    "hosts": {
+      "description": "Machines in the instance.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "hostname", "aliases", "provider", "user", "workspace"],
+        "properties": {
+          "id": {"type": "string", "description": "Short name agents use, also the SSH alias."},
+          "hostname": {"type": "string", "description": "Address or DNS name to reach the host."},
+          "aliases": {"type": "array", "items": {"type": "string"}},
+          "provider": {"type": "string", "description": "Where the machine runs."},
+          "user": {"type": "string", "description": "Login user."},
+          "workspace": {"type": ["integer", "null"], "description": "Workspace number pinned to this host, or null."},
+          "notes": {"type": "string"},
+          "key_paths": {
+            "description": "Paths agents on this host should know. Rendered as a 'Key paths on <id>' list in the topology block.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["path", "note"],
+              "properties": {
+                "path": {"type": "string"},
+                "note": {"type": "string"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "workspaces": {
+      "description": "Numbered desktop workspaces. One marked hot is a slot picked per login, with no host or project of its own.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["number", "name", "host"],
+        "properties": {
+          "number": {"type": "integer"},
+          "name": {"type": "string"},
+          "host": {"type": ["string", "null"], "description": "Host id, or null for a local workspace."},
+          "start_path": {"type": "string"},
+          "hot": {"type": "boolean"},
+          "chrome_profile": {"type": "string"}
+        }
+      }
+    },
+    "system": {
+      "description": "The G-System repos this instance runs.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "description", "url"],
+        "properties": {
+          "id": {"type": "string"},
+          "description": {"type": "string"},
+          "url": {"type": "string"},
+          "private": {"type": "boolean"},
+          "inherits_from": {"type": "array", "items": {"type": "string"}, "description": "Ids of the system repos this one reads from."},
+          "instance": {"type": "boolean", "description": "True on the instance repo's own entry. Its id names the instance in the rendered session excerpt."}
+        }
+      }
+    },
+    "services": {
+      "description": "Long-running processes. Health resolves from health_url, then domain, then port, then unit.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "repo", "host", "port", "domain", "unit", "health_url"],
+        "properties": {
+          "id": {"type": "string"},
+          "repo": {"type": "string"},
+          "host": {"type": "string", "description": "Host id."},
+          "port": {"type": ["integer", "null"]},
+          "domain": {"type": ["string", "null"]},
+          "unit": {"type": ["string", "null"], "description": "systemd service name."},
+          "health_url": {"type": ["string", "null"]},
+          "health_note": {"type": "string"}
+        }
+      }
+    },
+    "dependencies": {
+      "description": "Catalog of external and paid dependencies, checked by the brain's status layer. See alert-spine.md.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "provider", "powers", "criticality"],
+        "properties": {
+          "id": {"type": "string"},
+          "provider": {"type": "string"},
+          "powers": {"type": "string", "description": "What stops working when it lapses."},
+          "criticality": {"enum": ["vital", "important", "nice"]},
+          "probe": {
+            "description": "A central check. type is one of ntfy, http, balance, expires. Other keys depend on the type and name environment variables, never values.",
+            "type": "object",
+            "required": ["type"],
+            "properties": {
+              "type": {"enum": ["ntfy", "http", "balance", "expires"]},
+              "url": {"type": "string"},
+              "url_env": {"type": "string"},
+              "auth_env": {"type": "string"},
+              "auth_scheme": {"type": "string"},
+              "key_env": {"type": "string"},
+              "key_param": {"type": "string"},
+              "value_path": {"type": "string"},
+              "minus_path": {"type": "string"},
+              "min": {"type": "number"},
+              "date": {"type": "string"},
+              "warn_days": {"type": "integer"}
+            }
+          },
+          "health": {
+            "description": "Forward a check from a service's /health instead of probing centrally.",
+            "type": "object",
+            "required": ["service", "check"],
+            "properties": {
+              "service": {"type": "string"},
+              "check": {"type": "string"}
+            }
+          },
+          "notes": {"type": "string"}
+        }
+      }
+    },
+    "projects": {
+      "description": "Repos the instance tracks. managed means the project ticks all four compliance boxes.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "url", "host", "managed"],
+        "properties": {
+          "id": {"type": "string"},
+          "url": {"type": "string"},
+          "host": {"type": "string"},
+          "managed": {"type": "boolean"},
+          "status": {"enum": ["active", "deprecated", "fossil"]}
+        }
+      }
+    }
+  }
+}

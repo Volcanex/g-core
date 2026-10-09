@@ -1,0 +1,24 @@
+{
+  "workspaces": {
+    "1": {
+      "accent_color": "#000000"
+    },
+    "2": {
+      "accent_color": "#001f5b"
+    },
+    "3": {
+      "accent_color": "#e7390d"
+    },
+    "5": {
+      "accent_color": "#6495ed"
+    }
+  },
+  "hosts": {
+    "a": {
+      "display_name": "Alpha"
+    },
+    "w": {
+      "display_name": "Worker"
+    }
+  }
+}
