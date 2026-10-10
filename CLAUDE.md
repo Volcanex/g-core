@@ -3,7 +3,7 @@
 The framework half of the G-System's topology layer. g-core holds no topology of its own.
 An instance repo (gp-core is the reference one) holds the real `manifest.json`,
 `presentation.json`, passport and house conventions, and g-core renders and validates them.
-Source-available under PolyForm Noncommercial 1.0.0.
+Open source under the GNU AGPL v3.0 only (`LICENSE`).
 
 ## Files
 - `render_context.py` writes the topology block of an instance's `CLAUDE.md` from its

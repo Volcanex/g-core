@@ -26,4 +26,4 @@ from each project.
 
 ## Licence
 
-g-core is source-available under the PolyForm Noncommercial License 1.0.0. See `LICENSE`.
+Copyright (C) 2026 Gabriel Penman. Licensed under the GNU Affero General Public License v3.0 only, see `LICENSE`.
