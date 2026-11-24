@@ -77,6 +77,15 @@ The health check resolves in this order, and the first match wins:
 
 A service with none of these is not compliant.
 
+Two optional fields reach what the watching host cannot see from outside:
+- `probe_from: <host id>` beside a `health_url` runs that HTTP check on the named host, for a
+  URL bound to its loopback or private network.
+- `check: <name>` hands the judgement to the service's own host. The watcher runs `check <name>`
+  there over its probe key and reads one line back: `up`, `warn` or `down`, then the detail.
+  Thresholds stay in that host's instance, so use it for disk, memory, a backup's age and
+  anything else only the host can measure. A check only reads. Any other answer is `unknown`
+  and never pages.
+
 ## Project lifecycle status
 
 An entry under `projects` in `manifest.json` may carry a `status`:

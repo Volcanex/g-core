@@ -80,7 +80,9 @@
           "domain": {"type": ["string", "null"]},
           "unit": {"type": ["string", "null"], "description": "systemd service name."},
           "health_url": {"type": ["string", "null"]},
-          "health_note": {"type": "string"}
+          "health_note": {"type": "string"},
+          "probe_from": {"type": "string", "description": "Host id that runs the health_url check, for a URL only that host can reach."},
+          "check": {"type": "string", "pattern": "^[a-z0-9-]+$", "description": "A named check the service's own host runs and judges; it answers up, warn or down."}
         }
       }
     },
